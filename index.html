@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo da Cobrinha</title>
+<style>
+/* Estilos gerais da página e do canvas */
+body {
+font-family: Arial, sans-serif;
+background-color: #daaff8; /* Cor de fundo */
+color: rgb(0, 0, 0); /* Cor do texto */
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+}
+canvas {
+border: 2px solid #fff;
+background-color: #000000; /* Cor do fundo do canvas */
+}
+h1 {
+position: absolute;
+top: 10px;
+font-size: 36px;
+text-align: center;
+width: 100%;
+}
+</style>
+</head>
+<body>
+<h1>Jogo da Cobrinha</h1>
+<canvas id="gameCanvas" width="400" height="400"></canvas> <!-- Canvas onde o jogo será exibido -->
+<script>
+// Obtém o elemento do canvas e o contexto de desenho
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const box = 20; // Tamanho de cada "quadrado" (unidade) da cobrinha
+let score = 0; // Placar inicial
+// Define a cobrinha (inicialmente com 1 quadrado na posição 9,9)
+let snake = [{x: 9 * box, y: 9 * box}];
+// Direção inicial (sem movimento)
+let d;
+// Define a posição inicial da comida
+let food = {
+x: Math.floor(Math.random() * 20) * box,
+y: Math.floor(Math.random() * 20) * box
+};
+// Função para desenhar a cobrinha
+function drawSnake() {
+for (let i = 0; i < snake.length; i++) {
+ctx.fillStyle = (i === 0) ? "purple" : "white"; // A cabeça da cobrinha é verde
+ctx.fillRect(snake[i].x, snake[i].y, box, box); // Desenha cada quadrado da cobrinha
+}
+}
+// Função para desenhar a comida
+function drawFood() {
+ctx.fillStyle = "yellow"; // Cor da comida
+ctx.fillRect(food.x, food.y, box, box); // Desenha a comida no canvas
+}
+// Função que atualiza o estado do jogo
+function update() {
+// Verifica se a cobrinha colidiu com a parede ou com ela mesma
+if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height
+|| collision(snake[0], snake)) {
+
+clearInterval(game); // Se colidir, o jogo termina
+
+}
+// A cabeça da cobrinha se move na direção escolhida
+let newHead = {x: snake[0].x, y: snake[0].y};
+// Atualiza a posição da cabeça de acordo com a direção
+if (d === "LEFT") newHead.x -= box;
+if (d === "UP") newHead.y -= box;
+if (d === "RIGHT") newHead.x += box;
+if (d === "DOWN") newHead.y += box;
+// Adiciona a nova cabeça no início da cobrinha
+snake.unshift(newHead);
+// Verifica se a cobrinha comeu a comida
+if (snake[0].x === food.x && snake[0].y === food.y) {
+score++; // Aumenta a pontuação
+// Gera uma nova comida em uma posição aleatória
+food = {
+x: Math.floor(Math.random() * 20) * box,
+y: Math.floor(Math.random() * 20) * box
+};
+} else {
+snake.pop(); // Remove a cauda da cobrinha, se não comeu a comida
+}
+// Limpa o canvas para redesenhar a cobrinha e a comida
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+drawSnake(); // Redesenha a cobrinha
+drawFood(); // Redesenha a comida
+// Exibe a pontuação no canvas
+ctx.fillStyle = "white";
+ctx.font = "20px Arial";
+ctx.fillText("Pontuação: " + score, 10, canvas.height - 10);
+}
+// Função para verificar se a cobrinha colidiu com ela mesma
+function collision(head, array) {
+for (let i = 1; i < array.length; i++) {
+// Se a cabeça da cobrinha colidir com qualquer outra parte do corpo
+if (head.x === array[i].x && head.y === array[i].y) {
+return true; // Retorna true se houver colisão
+}
+}
+return false; // Retorna false caso contrário
+}
+// Função para capturar a direção do teclado
+document.addEventListener("keydown", direction);
+function direction(event) {
+// A cada tecla pressionada, define a direção da cobrinha
+if (event.keyCode === 37 && d !== "RIGHT") { // Tecla esquerda
+d = "LEFT";
+} else if (event.keyCode === 38 && d !== "DOWN") { // Tecla para cima
+d = "UP";
+} else if (event.keyCode === 39 && d !== "LEFT") { // Tecla direita
+d = "RIGHT";
+} else if (event.keyCode === 40 && d !== "UP") { // Tecla para baixo
+d = "DOWN";
+}
+}
+// Função que chama a função de atualização do jogo a cada 100ms
+const game = setInterval(update, 200);
+</script>
+</body>
+</html>
